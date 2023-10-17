@@ -113,3 +113,48 @@ Q9 <- surveys %>%
   filter(weight == max(weight)) %>% 
   select(year, genus, species_id, weight) %>% 
   unique()
+
+
+
+# Joining Data
+
+count(surveys, taxa)
+taxa_iucn <- data.frame(
+  taxa = c("Bird", "Rabbit", "Rodent"),
+  iucn = c("NT", "LC", "LC")
+)
+taxa_iucn
+
+surveys_iucn <- left_join(surveys, taxa_iucn, by = "taxa")
+head(surveys_iucn)
+
+
+#Q10: How many records were there for NT and LC taxa?
+
+table(surveys_iucn$iucn)
+
+#There were 34332 LC taxa records and 450 NT taxa records
+
+
+#Q11: What kind of taxa do the NAs in iucn correspond to?
+
+surveys_iucn %>% 
+  filter(is.na(iucn)) %>% 
+  select(taxa) %>% 
+  unique()
+
+# Reptiles
+
+#Instead use inner join
+surveys_iucn2 <- inner_join(surveys, taxa_iucn, by = "taxa")
+
+surveys_iucn %>% 
+  select(taxa) %>% 
+  unique()
+
+surveys_iucn2 %>% 
+  select(taxa) %>% 
+  unique()
+
+#There are 34772 rows in surveys_iucn2, and no reptiles are in surveys_iucn2. 
+
