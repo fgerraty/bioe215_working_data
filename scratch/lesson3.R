@@ -65,3 +65,51 @@ new_dataframe <- surveys %>%
   select(species_id, hindfoot_cm) %>% 
   filter(hindfoot_cm < 3)
   
+
+#Using group_by and summarize() ####
+
+#What’s the average weight of the observed animals by sex?
+  
+  surveys %>% 
+  group_by(sex) %>% 
+  summarize(mean_weight = mean(weight, na.rm = TRUE), 
+            .groups = "drop")
+
+# Group by multiple columns, e.g. sex and species.
+
+surveys %>% 
+  drop_na(weight) %>% 
+  group_by(species_id, sex) %>% 
+  summarize(mean_weight = mean(weight),
+            .groups = "drop") %>% 
+  arrange(desc(mean_weight))
+
+
+
+
+#Q7: How many animals were caught in each plot_type surveyed?
+
+surveys %>% 
+  group_by(plot_type) %>% 
+  count() %>% 
+  ungroup()
+
+#Q8: Use group_by() and summarize() to find the mean, min, and max hindfoot length for each species (using species_id). Also add the number of observations (hint: see ?n).
+
+Q8 <- surveys %>% 
+  drop_na(hindfoot_length) %>% 
+  group_by(species_id) %>% 
+  summarise(mean = mean(hindfoot_length),
+         min = min(hindfoot_length), 
+         max = max(hindfoot_length),
+         n = n()) %>% 
+  ungroup()
+
+#Q9: What was the heaviest animal measured in each year? Return the columns year, genus, species_id, and weight.
+
+Q9 <- surveys %>% 
+  drop_na(weight) %>% 
+  group_by(year) %>% 
+  filter(weight == max(weight)) %>% 
+  select(year, genus, species_id, weight) %>% 
+  unique()
