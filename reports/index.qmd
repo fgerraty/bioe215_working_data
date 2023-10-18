@@ -1,0 +1,61 @@
+# Week 3 Assessment
+
+First, load the tidyverse and import data.
+
+```{r}
+library(tidyverse)
+
+bor_nestlings <- read_csv(here::here("data/73_species.csv"))
+bor_traits <-read_csv(here::here("data/Traits_73_species.csv"))
+avonet <- readxl::read_excel(here::here("data/AVONET Supplementary dataset 1.xlsx"))
+```
+
+Now, lets explore the data together: *Are nestlings showing up earlier in the year over time?*
+
+```{r}
+all_birds_trend <- bor_nestlings %>% 
+  group_by(Year) %>% 
+  summarize(mean_doy = mean(Dayofyear))
+
+ggplot(all_birds_trend, aes(Year, mean_doy)) + 
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Sure looks like they are showing up earlier each year.
+
+Let\'s see the breakdown by species.
+
+```{r}
+species_trends <- bor_nestlings %>% 
+  group_by(Year, Species) %>% 
+  summarize(mean_doy = mean(Dayofyear),
+            .groups = "drop")
+
+ggplot(species_trends, aes(Year, mean_doy, color = Species)) + 
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+So chaotic! What if we just look at the 5 most data-rich species?
+
+```{r}
+data_richness <- bor_nestlings %>% 
+  count(Species)
+
+most_rich <- data_richness %>% 
+  arrange(desc(n)) %>% 
+  slice(1:5)
+
+most_rich_trends <- bor_nestlings %>% 
+  filter(Species %in% most_rich$Species) %>% 
+  group_by(Species, Year) %>% 
+  summarize(mean_doy = mean(Dayofyear), 
+            .groups = "drop")
+
+ggplot(most_rich_trends, aes(Year, mean_doy, color = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+A general pattern, with one conflicting example. What species have the strongest trends?
