@@ -3,11 +3,12 @@
 First, load the tidyverse and import data.
 
 ```{r}
+
 library(tidyverse)
 
 bor_nestlings <- read_csv(here::here("data/73_species.csv"))
 bor_traits <-read_csv(here::here("data/Traits_73_species.csv"))
-avonet <- readxl::read_excel(here::here("data/AVONET Supplementary dataset 1.xlsx"))
+avonet <- readxl::read_excel(here::here("data/AVONET Supplementary dataset 1.xlsx", sheet = "AVONET1_BirdLife"))
 ```
 
 Now, lets explore the data together: *Are nestlings showing up earlier in the year over time?*
@@ -24,7 +25,7 @@ ggplot(all_birds_trend, aes(Year, mean_doy)) +
 
 Sure looks like they are showing up earlier each year.
 
-Let\'s see the breakdown by species.
+Let's see the breakdown by species.
 
 ```{r}
 species_trends <- bor_nestlings %>% 
@@ -59,3 +60,68 @@ ggplot(most_rich_trends, aes(Year, mean_doy, color = Species)) +
 ```
 
 A general pattern, with one conflicting example. What species have the strongest trends?
+
+```{r}
+
+# Finds the slope of the relationship between y and x
+trend <- function(x, y) {
+  xy_lm <- lm(y ~ x)
+  coef(xy_lm)[2]
+}
+
+# Calculate the trend for all species
+bor_trends <- species_trends %>% 
+  group_by(Species) %>% 
+  summarize(doy_trend = trend(Year, mean_doy))
+```
+
+Here are 5 of the species with the strongest trends:
+
+```{r}
+strongest <- bor_trends %>% 
+  arrange(-abs(doy_trend))
+
+strongest[1:5,]
+```
+
+Lets plot of a few of these species:
+
+```{r}
+soi <- c("ARDCIN", "LARMIN")
+species_trends %>% 
+  filter(Species %in% soi) %>% 
+  ggplot(aes(Year, mean_doy, color = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Find the species with the most positive and most negative trends, then plot just those.
+
+```{r}
+nrow_bor_trends <- nrow(bor_trends) # Use this later
+
+bor_extreme <- bor_trends %>% 
+  # Sort by the day of year trend
+  arrange(doy_trend) %>% 
+  # Keep just the first (most negative trend) and last (most positive trend) rows
+  slice(c(1, nrow_bor_trends))
+
+# Now plot them
+species_trends %>% 
+  filter(Species %in% bor_extreme$Species) %>% 
+  ggplot(aes(Year, mean_doy, color = Species)) + 
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+
+Next we\'re going to test the hypothesis that smaller birds have more flexible phenology, i.e. the absolute value of the trend is correlated with smaller body sizes.
+
+To test our hypothesis, we need to add AVONET data to our phenology data by joining. The keys are a bit tricky here!
+
+```{r}
+# First, select and rename important columns
+avonet_size <- select(avonet, SciName = Species1, Mass_g = Mass)
+bor_sciname <- select(bor_traits, 
+                      Species = Abbreviation, 
+                      SciName = `Scientific name`)
+```
