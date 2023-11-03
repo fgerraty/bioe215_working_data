@@ -8,7 +8,7 @@ library(tidyverse)
 
 bor_nestlings <- read_csv(here::here("data/73_species.csv"))
 bor_traits <-read_csv(here::here("data/Traits_73_species.csv"))
-avonet <- readxl::read_excel(here::here("data/AVONET Supplementary dataset 1.xlsx", sheet = "AVONET1_BirdLife"))
+avonet <- readxl::read_excel(here::here("data/AVONET Supplementary dataset 1.xlsx"))
 ```
 
 Now, lets explore the data together: *Are nestlings showing up earlier in the year over time?*
@@ -114,7 +114,7 @@ species_trends %>%
     geom_smooth(method = "lm")
 ```
 
-Next we\'re going to test the hypothesis that smaller birds have more flexible phenology, i.e. the absolute value of the trend is correlated with smaller body sizes.
+Next we're going to test the hypothesis that smaller birds have more flexible phenology, i.e. the absolute value of the trend is correlated with smaller body sizes.
 
 To test our hypothesis, we need to add AVONET data to our phenology data by joining. The keys are a bit tricky here!
 
@@ -125,3 +125,33 @@ bor_sciname <- select(bor_traits,
                       Species = Abbreviation, 
                       SciName = `Scientific name`)
 ```
+
+We need to join `bor_trends` to `bor_traits`, then join with `avonet`.
+
+```{r}
+bor_trends_size <- bor_trends %>% 
+  left_join(bor_sciname, by = "Species")%>% 
+  left_join(avonet_size, by = "SciName") %>% 
+  mutate(abs_trend = abs(doy_trend))
+
+# Plot it
+ggplot(bor_trends_size, aes(Mass_g, abs_trend)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+That\'s kind of hard to interpret. Make a new variable, `bor_trends_size2`, that removes the missing values in `Mass_g` and keeps only birds smaller than 2000 g with an absolute trend less than 1.
+
+```{r}
+bor_trends_size2 <- bor_trends_size %>% 
+  drop_na(Mass_g) %>% 
+  filter(Mass_g<2000)
+  
+ggplot(bor_trends_size2, aes(Mass_g, abs_trend)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+**Is our hypothesis supported?**
+
+Our hypothesis, that smaller birds have more flexible phenology, is not supported based on my interpretation but I am not entirely sure. Hmm.
