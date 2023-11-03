@@ -339,7 +339,7 @@ dbl (1): Broods
 <p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>That's kind of hard to interpret. Make a new variable, <code>bor_trends_size2</code>, that removes the missing values in <code>Mass_g</code> and keeps only birds smaller than 2000 g with an absolute trend less than 1.</p>
+<p>That’s kind of hard to interpret. Make a new variable, <code>bor_trends_size2</code>, that removes the missing values in <code>Mass_g</code> and keeps only birds smaller than 2000 g with an absolute trend less than 1.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>bor_trends_size2 <span class="ot">&lt;-</span> bor_trends_size <span class="sc">%&gt;%</span> </span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(Mass_g) <span class="sc">%&gt;%</span> </span>

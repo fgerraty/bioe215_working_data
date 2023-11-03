@@ -140,7 +140,7 @@ ggplot(bor_trends_size, aes(Mass_g, abs_trend)) +
   geom_smooth(method = "lm")
 ```
 
-That\'s kind of hard to interpret. Make a new variable, `bor_trends_size2`, that removes the missing values in `Mass_g` and keeps only birds smaller than 2000 g with an absolute trend less than 1.
+That's kind of hard to interpret. Make a new variable, `bor_trends_size2`, that removes the missing values in `Mass_g` and keeps only birds smaller than 2000 g with an absolute trend less than 1.
 
 ```{r}
 bor_trends_size2 <- bor_trends_size %>% 
